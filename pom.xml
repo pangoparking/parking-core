@@ -90,5 +90,8 @@
 	<modules>
 		<module>db-fines-populator</module>
 		<module>parking-analyzer</module>
+		<module>inspector</module>
+		<module>validator</module>
+		<module>notifier</module>
 	</modules>
 </project>

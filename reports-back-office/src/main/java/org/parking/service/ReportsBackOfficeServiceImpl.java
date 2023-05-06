@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(readOnly = true)
 public class ReportsBackOfficeServiceImpl implements ReportsBackOfficeService {
 
-	private static final String MSG_FINES = "owner ID: {} fines: {}";
+	private static final String MSG_FINES = "owner ID:{}, fines: {}";
 	private static final String NOT_EXIST_MSG = "id: %d does not exist";
 	private static final String DATE_ERROR_MSG = "date 'from' %s can't be after date 'to' %s";
 	

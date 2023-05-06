@@ -31,7 +31,7 @@ public class ReportsBackOfficeController {
 	ReportsBackOfficeService service;
 
 	@GetMapping("{ownerID}")
-	List<FineDoc> getFines(@Min(value = 1, message = VALID_ID_MSG) @PathVariable ("ownerID") long ownerID,
+	List<FineDoc> getFinesByOwnerID(@Min(value = 1, message = VALID_ID_MSG) @PathVariable ("ownerID") long ownerID,
 			@Pattern(regexp = REGEXP_DATE, message = REGEXP_DATE_MSG) @RequestParam(name = "from", required = false) String fromDateTime,
 			@Pattern(regexp = REGEXP_DATE, message = REGEXP_DATE_MSG) @RequestParam(name = "to", required = false) String toDateTime) {
 		if(fromDateTime == null && toDateTime == null) {
@@ -39,7 +39,7 @@ public class ReportsBackOfficeController {
 			return service.getFinesByOwnerID(ownerID);
 		}
 		LocalDateTime from = fromDateTime == null ? LocalDateTime.of(1000, 1, 1, 0, 0) : LocalDateTime.parse(fromDateTime);
-		LocalDateTime to = fromDateTime == null ? LocalDateTime.now() : LocalDateTime.parse(toDateTime);
+		LocalDateTime to = toDateTime == null ? LocalDateTime.now() : LocalDateTime.parse(toDateTime);
 		log.debug(GET_FINES_MSG +" from {} to {}", ownerID, from, to);
 		return service.getFinesByOwnerIDAndDateTimeInterval(ownerID, from, to);
 	}

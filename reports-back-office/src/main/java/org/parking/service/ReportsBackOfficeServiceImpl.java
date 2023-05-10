@@ -2,60 +2,85 @@ package org.parking.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Map;
 
 import org.parking.FineDoc;
-import org.parking.repository.FinesRepository;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-@Transactional(readOnly = true)
 public class ReportsBackOfficeServiceImpl implements ReportsBackOfficeService {
 
-	private static final String MSG_FINES = "owner ID:{}, fines: {}";
-	private static final String NOT_EXIST_MSG = "id: %d does not exist";
-	private static final String DATE_ERROR_MSG = "date 'from' %s can't be after date 'to' %s";
+	private ApplicationContext applicationContext;
 	
 	@Autowired
-	FinesRepository repository;
+	FinesStatusService finesStatusService; 
+	
+	private static final String TO = "to";
+	private static final String FROM = "from";
+	private static final String FROM_TO_MSG = " from {} to {}";
+	private static final String GET_FINES_BY_ID_MSG = "calling the service to get fines on {}: {}";
+	private static final String GET_FINES_BY_STATUS_MSG = "calling the service to get fines on status: {}";
+	private static final String CLASS_NAME_MSG = "constructed class name according to request: '{}'";
+	private static final String DATE_ERROR_MSG = "date 'from' %s can't be after date 'to' %s";
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;		
+	}
 	
 	@Override
-	public List<FineDoc> getFinesByOwnerID(long ownerID) {
-		chekOwnerID(ownerID);
-		List<FineDoc> fines = repository.findAllByOwnerID(ownerID);
-		log.debug(MSG_FINES, ownerID, fines);
-		return fines;
+	public List<FineDoc> getFinesByKeyAndID(String key, long id, String fromDateTime, String toDateTime) {
+		if(fromDateTime == null && toDateTime == null) {
+			FinesByIDService service = (FinesByIDService) getService(key);
+			log.debug(GET_FINES_BY_ID_MSG, key, id);
+			return service.getFinesByID(id);
+		}
+		Map<String, LocalDateTime> dates = checkAndGetDates(fromDateTime, toDateTime);
+		FinesByIDService service = (FinesByIDService) getService(key);
+		log.debug(GET_FINES_BY_ID_MSG + FROM_TO_MSG, key, id, dates.get(FROM), dates.get(TO));
+		return service.getFinesByIDAndDateTimeInterval(id, dates.get(FROM), dates.get(TO));
 	}
 
 	@Override
-	public List<FineDoc> getFinesByOwnerIDAndDateTimeInterval(long ownerID, LocalDateTime from, LocalDateTime to) {
-		chekOwnerID(ownerID);
+	public List<FineDoc> getFinesByStatus(String status, String fromDateTime, String toDateTime) {
+		if(fromDateTime == null && toDateTime == null) {
+			log.debug(GET_FINES_BY_STATUS_MSG, status);
+			return finesStatusService.getFinesByStatus(status);
+		}
+		Map<String, LocalDateTime> dates = checkAndGetDates(fromDateTime, toDateTime);
+		log.debug(GET_FINES_BY_STATUS_MSG + FROM_TO_MSG, status, dates.get(FROM), dates.get(TO));
+		return finesStatusService.getFinesByStatusAndDateTimeInterval(status, dates.get(FROM), dates.get(TO));
+	}
+
+	@Override
+	public String classNameBuilder(String key) {
+		String className = "fines" + key.substring(0, 1).toUpperCase() + key.substring(1) + "Service";  
+		log.debug(CLASS_NAME_MSG, className);
+		return className;
+	}
+
+	private Map<String, LocalDateTime> checkAndGetDates(String fromDateTime, String toDateTime) {
+		LocalDateTime from = fromDateTime == null ? LocalDateTime.of(1000, 1, 1, 0, 0) : LocalDateTime.parse(fromDateTime);
+		LocalDateTime to = toDateTime == null ? LocalDateTime.now() : LocalDateTime.parse(toDateTime);
+		Map<String, LocalDateTime> dates = Map.of(FROM, from, TO, to);
 		if(from.isAfter(to)) {
 			String msg = String.format(DATE_ERROR_MSG, from, to);
 			log.error(msg);
 			throw new IllegalStateException(msg);
 		}
-		List<FineDoc> fines;
-		try {
-			fines = repository.findAllFinesByOwnerIDAndDateTimeInterval(ownerID, from, to);
-		} catch (Exception e) {
-			fines = List.of();
-		}
-		log.debug("from {} to {} " + MSG_FINES, from, to, ownerID, fines);
-		return fines;
+		return dates;
 	}
 
-	private void chekOwnerID(long ownerID) {
-		if(!repository.existsByOwnerID(ownerID)) {
-			String msg = String.format(NOT_EXIST_MSG, ownerID);
-			log.error(msg);
-			throw new NoSuchElementException(msg);
-		}
-	}
+	private Object getService(String key) {
+		String className = classNameBuilder(key);
+		Object service = applicationContext.getBean(className);
+		return service;
+	}	
 
 }

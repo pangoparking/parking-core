@@ -1,8 +1,7 @@
-package org.parking;
-
-import java.time.LocalDateTime;
+package org.parking.controller;
 import java.util.List;
 
+import org.parking.FineDoc;
 import org.parking.service.ReportsBackOfficeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -22,26 +21,29 @@ import lombok.extern.slf4j.Slf4j;
 @Validated
 public class ReportsBackOfficeController {
 
-	private static final String GET_FINES_MSG = "received request to get fines for owner id {}";
+	private static final String GET_FINES_BY_ID_MSG = "received request to get fines on {} id {}";
 	private static final String VALID_ID_MSG = "id can't be null or less than 1";
 	private static final String REGEXP_DATE = "\\d{4}-(0\\d|1[012])-(0\\d|[12]\\d|3[01])T\\d{2}:\\d{2}(:\\d{2})?(.\\d{3})?";
 	private static final String REGEXP_DATE_MSG = "date should be in format YYYY-MM-DDThh:mm(:ss.mll)";
+	private static final String GET_FINES_BY_STATUS_MSG = "received request to get fines on status: {}";
 	
 	@Autowired
 	ReportsBackOfficeService service;
 
-	@GetMapping("{ownerID}")
-	List<FineDoc> getFinesByOwnerID(@Min(value = 1, message = VALID_ID_MSG) @PathVariable ("ownerID") long ownerID,
+	@GetMapping("id/{key}/{id}")
+	List<FineDoc> getFinesByID(@PathVariable ("key") String key, @Min(value = 1, message = VALID_ID_MSG) @PathVariable ("id") long id,
 			@Pattern(regexp = REGEXP_DATE, message = REGEXP_DATE_MSG) @RequestParam(name = "from", required = false) String fromDateTime,
 			@Pattern(regexp = REGEXP_DATE, message = REGEXP_DATE_MSG) @RequestParam(name = "to", required = false) String toDateTime) {
-		if(fromDateTime == null && toDateTime == null) {
-			log.debug(GET_FINES_MSG, ownerID);
-			return service.getFinesByOwnerID(ownerID);
-		}
-		LocalDateTime from = fromDateTime == null ? LocalDateTime.of(1000, 1, 1, 0, 0) : LocalDateTime.parse(fromDateTime);
-		LocalDateTime to = toDateTime == null ? LocalDateTime.now() : LocalDateTime.parse(toDateTime);
-		log.debug(GET_FINES_MSG +" from {} to {}", ownerID, from, to);
-		return service.getFinesByOwnerIDAndDateTimeInterval(ownerID, from, to);
+		log.debug(GET_FINES_BY_ID_MSG, key, id);
+		return service.getFinesByKeyAndID(key, id, fromDateTime, toDateTime);
+	}
+	
+	@GetMapping("{status}")
+	List<FineDoc> getFinesByStatus(@PathVariable(name = "status") String status,
+			@Pattern(regexp = REGEXP_DATE, message = REGEXP_DATE_MSG) @RequestParam(name = "from", required = false) String fromDateTime,
+			@Pattern(regexp = REGEXP_DATE, message = REGEXP_DATE_MSG) @RequestParam(name = "to", required = false) String toDateTime) {
+		log.debug(GET_FINES_BY_STATUS_MSG, status);
+		return service.getFinesByStatus(status, fromDateTime, toDateTime);
 	}
 	
 }

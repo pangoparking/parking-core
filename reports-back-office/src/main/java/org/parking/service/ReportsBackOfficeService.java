@@ -1,13 +1,14 @@
 package org.parking.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.parking.FineDoc;
+import org.springframework.context.ApplicationContextAware;
 
-public interface ReportsBackOfficeService {
+public interface ReportsBackOfficeService extends ApplicationContextAware{
 
-	List<FineDoc> getFinesByOwnerID(long ownerID);
-	List<FineDoc> getFinesByOwnerIDAndDateTimeInterval(long ownerID, LocalDateTime from, LocalDateTime to);
+	List<FineDoc> getFinesByKeyAndID(String key, long id, String fromDateTime, String toDateTime);
+	String classNameBuilder(String key);
+	List<FineDoc> getFinesByStatus(String status, String fromDateTime, String toDateTime);
 	
 }

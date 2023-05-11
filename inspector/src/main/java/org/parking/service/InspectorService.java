@@ -1,4 +1,4 @@
-package inspector.service;
+package org.parking.service;
 
 import org.parking.model.CarData;
 import org.parking.model.EnumStatus;

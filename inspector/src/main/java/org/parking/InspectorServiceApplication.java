@@ -1,23 +1,22 @@
-package inspector.app;
+package org.parking;
 
 import java.util.function.Consumer;
 
 import org.parking.model.CarData;
 import org.parking.model.EnumStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.parking.service.InspectorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 
-import inspector.service.InspectorService;
+import lombok.extern.log4j.Log4j2;
 
+
+@Log4j2
 @SpringBootApplication
-@ComponentScan("inspector")
 public class InspectorServiceApplication {
 	
 	@Autowired
@@ -28,24 +27,23 @@ public class InspectorServiceApplication {
 
 	@Autowired
 	StreamBridge streamBridge;
-
-
-static Logger LOG = LoggerFactory.getLogger(InspectorServiceApplication.class);
+ 
 	public static void main(String[] args) {
 		SpringApplication.run(InspectorServiceApplication.class, args);
-
 	}
+	
 @Bean
 Consumer<CarData> inspectorConsumer(){
-	return this::payInspector;
+	return this::payInspector; 
 }
+
  void payInspector(CarData car) {
 	 if (service.isPangoPayed(car)==EnumStatus.unpaid) {
-	 streamBridge.send(bindingName,car);
+	 streamBridge.send(bindingName,car); 
      System.err.println("Message sent"); 
 	 }
-}
-	
+ }	
+ 
 
 	}
 

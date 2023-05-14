@@ -3,7 +3,7 @@ package org.parking.service;
 import java.time.LocalDateTime;
 
 import org.parking.FineRedisEntity;
-import org.parking.FinesRepository;
+import org.parking.FinesRedisRepository;
 import org.parking.model.CarData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import lombok.extern.log4j.Log4j2;
 public class ValidatorServiceImpl implements ValidatorService {
     
 	@Autowired
-	FinesRepository repository;
+	FinesRedisRepository repository;
 	
 	@Override
 	@Transactional

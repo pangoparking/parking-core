@@ -3,84 +3,119 @@ package org.parking.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.parking.FineDoc;
-import org.springframework.beans.BeansException;
+import org.parking.repository.FinesRepository;
+import org.parking.model.EnumStatus;
+import org.parking.model.MonthlyFineCount;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class ReportsBackOfficeServiceImpl implements ReportsBackOfficeService {
-
-	private ApplicationContext applicationContext;
+@Transactional(readOnly = true)
+public class ReportsBackOfficeServiceImpl implements ReportsBackOfficeService{
 	
 	@Autowired
-	FinesStatusService finesStatusService; 
+	FinesRepository repository;
 	
-	private static final String TO = "to";
-	private static final String FROM = "from";
-	private static final String FROM_TO_MSG = " from {} to {}";
-	private static final String GET_FINES_BY_ID_MSG = "calling the service to get fines on {}: {}";
-	private static final String GET_FINES_BY_STATUS_MSG = "calling the service to get fines on status: {}";
-	private static final String CLASS_NAME_MSG = "constructed class name according to request: '{}'";
-	private static final String DATE_ERROR_MSG = "date 'from' %s can't be after date 'to' %s";
+	private static final String FROM_TO_MSG = "from {} to {} ";
+	private static final String MSG_FINES = "{}:{}, fines: {}";
+	private static final String NOT_EXIST_MSG = "%s id: %d does not exist";
+	private static final String MSG_STATUS_FINES = "status:{}, fines: {}";
+	private static final String MSG_YEAR_FINES = "year:{}, fines: {}";
+	private static final String FINE_NOT_EXIST_MSG = "fine id: %d does not exist";
+	private static final String MSG_FINE_BY_ID = "fine: {}";
+	private static final String FINE_UPDATED_MSG = "fine has been updated: {}";
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;		
-	}
-	
-	@Override
-	public List<FineDoc> getFinesByKeyAndID(String key, long id, String fromDateTime, String toDateTime) {
-		if(fromDateTime == null && toDateTime == null) {
-			FinesByIDService service = (FinesByIDService) getService(key);
-			log.debug(GET_FINES_BY_ID_MSG, key, id);
-			return service.getFinesByID(id);
-		}
-		Map<String, LocalDateTime> dates = checkAndGetDates(fromDateTime, toDateTime);
-		FinesByIDService service = (FinesByIDService) getService(key);
-		log.debug(GET_FINES_BY_ID_MSG + FROM_TO_MSG, key, id, dates.get(FROM), dates.get(TO));
-		return service.getFinesByIDAndDateTimeInterval(id, dates.get(FROM), dates.get(TO));
-	}
-
-	@Override
-	public List<FineDoc> getFinesByStatus(String status, String fromDateTime, String toDateTime) {
-		if(fromDateTime == null && toDateTime == null) {
-			log.debug(GET_FINES_BY_STATUS_MSG, status);
-			return finesStatusService.getFinesByStatus(status);
-		}
-		Map<String, LocalDateTime> dates = checkAndGetDates(fromDateTime, toDateTime);
-		log.debug(GET_FINES_BY_STATUS_MSG + FROM_TO_MSG, status, dates.get(FROM), dates.get(TO));
-		return finesStatusService.getFinesByStatusAndDateTimeInterval(status, dates.get(FROM), dates.get(TO));
-	}
-
-	@Override
-	public String classNameBuilder(String key) {
-		String className = "fines" + key.substring(0, 1).toUpperCase() + key.substring(1) + "Service";  
-		log.debug(CLASS_NAME_MSG, className);
-		return className;
-	}
-
-	private Map<String, LocalDateTime> checkAndGetDates(String fromDateTime, String toDateTime) {
-		LocalDateTime from = fromDateTime == null ? LocalDateTime.of(1000, 1, 1, 0, 0) : LocalDateTime.parse(fromDateTime);
-		LocalDateTime to = toDateTime == null ? LocalDateTime.now() : LocalDateTime.parse(toDateTime);
-		Map<String, LocalDateTime> dates = Map.of(FROM, from, TO, to);
-		if(from.isAfter(to)) {
-			String msg = String.format(DATE_ERROR_MSG, from, to);
+	public FineDoc getFineByID(long id) {
+		FineDoc fine = repository.findById(id).orElse(null);
+		if(fine == null) {
+			String msg = String.format(FINE_NOT_EXIST_MSG, id);
 			log.error(msg);
-			throw new IllegalStateException(msg);
+			throw new NoSuchElementException(msg);
 		}
-		return dates;
+		log.debug(MSG_FINE_BY_ID, fine);
+		return fine;
+	}
+	
+	@Override
+	public List<FineDoc> getFinesByKeyAndID(String key, long id) {
+		checkExistOfIDByKey(key, id);
+		List<FineDoc> fines = repository.findAllByKeyAndID(key, id);
+		log.debug(MSG_FINES, key, id, fines);
+		return fines;
 	}
 
-	private Object getService(String key) {
-		String className = classNameBuilder(key);
-		Object service = applicationContext.getBean(className);
-		return service;
-	}	
+	@Override
+	public List<FineDoc> getFinesByKeyAndIDAndDateTimeInterval(String key, long id, LocalDateTime from,
+			LocalDateTime to) {
+		checkExistOfIDByKey(key, id);
+		List<FineDoc> fines = repository.findAllByKeyAndIDAndDateTimeInterval(key, id, from, to);
+		log.debug(FROM_TO_MSG + MSG_FINES, from, to, id, fines);
+		return fines;
+	}
 
+	@Override
+	public List<FineDoc> getFinesByStatus(String status) {
+		List<FineDoc> fines;
+		if (status.compareTo("all") == 0) {
+			fines = repository.findAll();
+		} else {
+			fines = repository.findAllByStatus(status);
+		}
+		log.debug(MSG_STATUS_FINES, status, fines);
+		return fines;
+	}
+
+	@Override
+	public List<FineDoc> getFinesByStatusAndDateTimeInterval(String status, LocalDateTime from, LocalDateTime to) {
+		List<FineDoc> fines;
+		if (status.compareTo("all") == 0) {
+			fines = repository.findAllByDateTimeInterval(from, to);
+		} else {
+			fines = repository.findAllByStatusAndDateTimeInterval(status, from, to);
+		}
+		log.debug(FROM_TO_MSG + MSG_STATUS_FINES, from, to, status, fines);
+		return fines;
+	}
+
+	@Override
+	public Map<Integer, Integer> getFinesByYear(int year) {
+		LocalDateTime from = LocalDateTime.of(year, 1, 1, 0, 0);
+		LocalDateTime to = LocalDateTime.of(year + 1, 1, 1, 0, 0);
+		List<MonthlyFineCount> fineCounts = repository.findAllByYear(from, to);
+		Map<Integer, Integer> result = fineCounts.stream()
+		        .collect(Collectors.toMap(MonthlyFineCount::getMonth, MonthlyFineCount::getCount));
+		log.debug(MSG_YEAR_FINES, year, result.toString());
+		return result;
+	}
+
+	@Transactional
+	@Override
+	public FineDoc updateFineStatus(long id, EnumStatus status) {
+		FineDoc fine = getFineByID(id);
+		fine.setStatus(status.name());
+		repository.save(fine);
+		log.debug(FINE_UPDATED_MSG, fine);
+		return fine;
+	}
+	
+	private void checkExistOfIDByKey(String key, long id) {
+		List<FineDoc> res = null;
+		res = repository.existsByKeyAndID(key, id, PageRequest.of(0, 1));
+		if(res.isEmpty()) {
+			String msg = String.format(NOT_EXIST_MSG, key, id);
+			log.error(msg);
+			throw new NoSuchElementException(msg);
+		}
+	}
+	
 }

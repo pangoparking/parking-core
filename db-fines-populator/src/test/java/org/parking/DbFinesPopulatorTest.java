@@ -29,8 +29,8 @@ class DbFinesPopulatorTest {
 	@Autowired
 	FinesRepository finesRepository;
 
-	private Fine firstFine = new Fine(1, "Alex", 1, "parking 1", LocalDateTime.of(2023, 5, 5, 12, 0), 150, EnumStatus.unpaid);
-	private Fine secondFine = new Fine(2, "Victor", 2, "parking 2", LocalDateTime.of(2023, 5, 5, 13, 0), 250, EnumStatus.unpaid);
+	private Fine firstFine = new Fine(1, 1, "Alex", "mail@mail.com", 1, "parking 1", LocalDateTime.of(2023, 5, 5, 12, 0), 150, EnumStatus.unpaid);
+	private Fine secondFine = new Fine(2, 2, "Victor", "mail@mail.com", 2, "parking 2", LocalDateTime.of(2023, 5, 5, 13, 0), 250, EnumStatus.unpaid);
 	private FineDoc firstFineDoc = FineDoc.of(firstFine);
 	private FineDoc secondFineDoc = FineDoc.of(secondFine);
 	

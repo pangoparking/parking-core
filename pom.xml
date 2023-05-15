@@ -93,5 +93,6 @@
 		<module>inspector</module>
 		<module>validator</module>
 		<module>notifier</module>
+		<module>reports-back-office</module>
 	</modules>
 </project>

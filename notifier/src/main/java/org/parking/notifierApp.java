@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 
 import org.parking.model.CarData;
 import org.parking.model.Fine;
-import org.parking.service.notifierService;
+import org.parking.service.NotifierService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -19,7 +19,7 @@ import lombok.extern.log4j.Log4j2;
 public class notifierApp {
 
 	@Autowired
-	notifierService service;
+	NotifierService service;
 	
 	@Autowired
 	StreamBridge streamBridge;

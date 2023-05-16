@@ -12,7 +12,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
-public class notivierServiceImpl implements notifierService {
+public class NotifierServiceImpl implements NotifierService {
 
 	@Value("${spring.mail.username}")
 	public String emailFrom;
@@ -39,7 +39,7 @@ public class notivierServiceImpl implements notifierService {
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
 			mailMessage.setFrom(emailFrom);
 			mailMessage.setTo(emailTo);
-			mailMessage.setText(String.format( "Штраф за парковку carId:%d",fine.carID));
+			mailMessage.setText(String.format( "Car fined carId:%d",fine.carID));
 			mailMessage.setSubject("Parking information");
 
 			javaMailSender.send(mailMessage);

@@ -7,7 +7,6 @@
   </parent>
   <groupId>org.parking.notifier</groupId>
   <artifactId>notifier</artifactId>
-  <version>0.0.1</version>
   <name>Notifier</name>
   <description>Email sender</description>
     <dependencies>

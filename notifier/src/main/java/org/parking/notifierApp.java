@@ -38,11 +38,11 @@ public class notifierApp {
 	}
 	
 	void sendNotification(Fine fine) {
-		fine = service.SendMailService(fine);
-		if(fine != null) {
-			streamBridge.send(bindingName, fine);
+		if (fine !=null) {
+		 service.SendMailService(fine);
+		}
 		
 		}
 
 	}
-}
+

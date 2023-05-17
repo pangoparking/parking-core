@@ -1,6 +1,5 @@
 package org.parking.service;
 
-import org.parking.model.EmailMessage;
 import org.parking.model.Fine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,20 +24,17 @@ public class NotifierServiceImpl implements NotifierService {
     private JavaMailSender javaMailSender;
 	
 	@Override
-	public Fine SendMailService(Fine fine) {
-		if (fine!=null) {
-			sendSimpleMail(fine);
-		}
-				
-	return null;
+	public String SendMailService(Fine fine) {
+	
+		return (fine.email!=null)? sendSimpleMail(fine):null;
 	}
 	
 	public String sendSimpleMail(Fine fine) {
 
 		try {
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
-			mailMessage.setFrom(emailFrom);
-			mailMessage.setTo(emailTo);
+			//mailMessage.setFrom(emailFrom);
+			mailMessage.setTo(fine.email);
 			mailMessage.setText(String.format( "Car fined carId:%d",fine.carID));
 			mailMessage.setSubject("Parking information");
 

@@ -16,7 +16,7 @@ import lombok.extern.log4j.Log4j2;
 @SpringBootApplication
 public class ParkingAnalizerAppl {
 	
-	@Value("${app.jumps.binding.name:carAnalyzer-out-0}")
+	@Value("${app.analyzer.binding.name:carAnalyzer-out-0}")
 	private String bindingName;
 	
 	@Autowired

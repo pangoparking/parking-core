@@ -16,8 +16,8 @@ public class NotifierServiceImpl implements NotifierService {
 	@Value("${spring.mail.username}")
 	public String emailFrom;
 	
-	@Value("${app.notifier.email.to}")
-	public String emailTo;
+	//@Value("${app.notifier.email.to}")
+	//public String emailTo;
 	
 	
     @Autowired
@@ -26,7 +26,7 @@ public class NotifierServiceImpl implements NotifierService {
 	@Override
 	public String SendMailService(Fine fine) {
 	
-		return (fine.email!=null)? sendSimpleMail(fine):null;
+		return (fine.ownerEmail!=null)? sendSimpleMail(fine):null;
 	}
 	
 	public String sendSimpleMail(Fine fine) {
@@ -34,12 +34,12 @@ public class NotifierServiceImpl implements NotifierService {
 		try {
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
 			//mailMessage.setFrom(emailFrom);
-			mailMessage.setTo(fine.email);
+			mailMessage.setTo(fine.ownerEmail);
 			mailMessage.setText(String.format( "Car fined carId:%d",fine.carID));
 			mailMessage.setSubject("Parking information");
 
 			javaMailSender.send(mailMessage);
-			log.trace("Email sent to %s",emailTo);
+			log.trace("Email sent to %s",fine.ownerEmail);
 			return "Mail Sent Successfully...";
 		}
 

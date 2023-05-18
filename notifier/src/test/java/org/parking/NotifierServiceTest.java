@@ -2,6 +2,8 @@ package org.parking;
 
 import static org.junit.Assert.*;
 
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -31,8 +33,8 @@ class NotifierServiceTest {
 	
     private static final String BINDING_NAME = "notifierConsumer-in-0";
  
-	public Fine fine = new Fine(123,"Robert Peterson","katebox85@gmail.com",1234,null,null,100,EnumStatus.unpaid);
-//	public Fine fineNullEmail = new Fine(123,"Robert Peterson",null,1234,null,null,100,EnumStatus.unpaid);
+	public Fine fine = new Fine(123,556,"Robert Peterson","katebox85@gmail.com",1234,null,null,100,EnumStatus.unpaid);
+//	public Fine fineNullEmail = new Fine(123,556,"Robert Peterson",null,1234,null,null,100,EnumStatus.unpaid);
 
 	@RegisterExtension
 	static public GreenMailExtension mailExtension = new GreenMailExtension(ServerSetupTest.SMTP).
@@ -50,7 +52,7 @@ class NotifierServiceTest {
     void notifierMailSendTest() throws MessagingException {
 		producer.send(new GenericMessage<Fine>(fine),BINDING_NAME);
 		MimeMessage message =mailExtension.getReceivedMessages()[0];
-		assertEquals(fine.email,message.getAllRecipients()[0].toString());
+		assertEquals(fine.ownerEmail,message.getAllRecipients()[0].toString());
      	//assertTrue(message.getSubject().contains(fine.carID));
 		
 	}

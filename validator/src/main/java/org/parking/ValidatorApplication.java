@@ -11,6 +11,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 @SpringBootApplication
 public class ValidatorApplication {
 
@@ -20,7 +23,7 @@ public class ValidatorApplication {
 	@Autowired
 	StreamBridge streamBridge;
 	
-	@Value("${app.validator.binding.name:carValidator-out-0}")
+	@Value("${app.validator.binding.name:fineValidator-out-0}")
 	private String bindingName;
 	
 	public static void main(String[] args) {
@@ -33,9 +36,12 @@ public class ValidatorApplication {
 		return this::fineValidator;
 	}
 	void fineValidator(CarData car) {
-		car = service.checkIfCarFined(car);
-		if(car != null) {
-			streamBridge.send(bindingName, car);
+		if(service.checkIfCarFined(car)!=null) {
+			try {
+				streamBridge.send(bindingName, car);
+			} catch (Exception e) {
+				log.error("Sending message to middleware service from validator failed:",e.getMessage());
+			}
 		}
 		
 	}

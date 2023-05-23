@@ -39,10 +39,10 @@ public class ParkingAnalizerServiceImpl implements ParkingAnalizerService {
 	private boolean isTimeExpired(CarRedisEntity carRedisEntity) {
 		if (carRedisEntity.getParkingEndTime().isBefore(LocalDateTime.now())) {
 			log.trace("Time of car with number {} is {} and is expired",carRedisEntity.getCarID(), carRedisEntity.getParkingEndTime());
-			return false;
+			return true;
 		} else {
 			log.trace("Time of car with number {} is {} and is NOT expired",carRedisEntity.getCarID(), carRedisEntity.getParkingEndTime());
-			return true;
+			return false;
 		}
 		
 	}

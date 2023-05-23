@@ -28,7 +28,7 @@ public class DbFinesPopulatorApll {
 	}
 
 	void publishFine(Fine fine) {
-		log.debug("received fine(ownerID: {}) for publishing to DataBase", fine.ownerID);
+		log.debug("received fine(id: {}) for publishing to DataBase", fine.id);
 		FineDoc fineDoc = FineDoc.of(fine);
 		fineRepository.save(fineDoc);
 	}

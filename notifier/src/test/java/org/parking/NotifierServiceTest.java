@@ -1,15 +1,12 @@
 package org.parking;
 
-import static org.junit.Assert.*;
-
-import java.time.LocalDateTime;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.parking.model.EnumStatus;
 import org.parking.model.Fine;
-import org.parking.service.NotifierService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.InputDestination;
@@ -42,11 +39,6 @@ class NotifierServiceTest {
 	
 	@BeforeAll
 	static void setUpBeforeAll() throws Exception{};
-	
-	@Test
-	void test() {
-		assertEquals(1,1);
-	}
 
 	@Test
     void notifierMailSendTest() throws MessagingException {

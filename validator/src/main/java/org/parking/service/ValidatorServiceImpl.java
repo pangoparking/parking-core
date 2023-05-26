@@ -2,6 +2,7 @@ package org.parking.service;
 
 import java.time.LocalDateTime;
 
+import org.parking.CarRedisEntity;
 import org.parking.FineRedisEntity;
 import org.parking.FinesRedisRepository;
 import org.parking.model.CarData;
@@ -21,20 +22,27 @@ public class ValidatorServiceImpl implements ValidatorService {
 	@Override
 	@Transactional
 	public CarData checkIfCarFined(CarData carData) {
-		if (!repository.existsById(carData.carID)) {
-			AddFineToRedis(carData);
+		if (repository.findById(carData.carID).orElse(null)==null) {
+			addFineToRedis(carData);
+			return null;
 		}
 		return carData;
 	}
 
-	
-	private void AddFineToRedis(CarData carData) {
-		FineRedisEntity redisFine = new FineRedisEntity(); 
-		redisFine.CarId=carData.carID;
-		redisFine.fined=true;
-		redisFine.fineTime=LocalDateTime.now();
-		repository.save(redisFine);
-		log.trace("FineData added to RedisRepository carId:%d",redisFine.CarId);
+	private void addFineToRedis(CarData carData) {
+		
+		try {
+			FineRedisEntity redisFine = new FineRedisEntity(); 
+			redisFine.CarId=carData.carID;
+			redisFine.fined=true;
+			redisFine.fineTime=LocalDateTime.now();
+			repository.save(redisFine);
+			log.trace("FineData added to RedisRepository carId:%d",redisFine.CarId);
+		} catch (Exception e) {
+			log.error("FineData not added to RedisRepository ", e.getMessage());
+			
+		}
+		
 	}
 
 	

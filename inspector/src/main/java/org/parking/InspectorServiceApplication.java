@@ -11,6 +11,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
+import org.springframework.web.client.RestTemplate;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -19,8 +21,24 @@ import lombok.extern.log4j.Log4j2;
 @SpringBootApplication
 public class InspectorServiceApplication {
 	
+//	@Autowired
+//	CarsOnParkingRepository repository;
+
+	//@Autowired
+	//Environment env;
+	
 	@Autowired
 	InspectorService service;
+	
+	@Autowired 
+	RestTemplate restTemplate;
+	
+	@Bean
+	public RestTemplate restTemplate() {
+	    return new RestTemplate();
+	}
+	
+	
 	
 	@Value("${app.inspector.binding.name:inspector-out-0}")
 	private String bindingName;

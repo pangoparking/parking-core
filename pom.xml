@@ -94,7 +94,6 @@
 		<module>validator</module>
 		<module>notifier</module>
 		<module>reports-back-office</module>
-		<module>configuration-server</module>
-		<module>gateway-service</module>
+		<module>preparatory</module>
 	</modules>
 </project>

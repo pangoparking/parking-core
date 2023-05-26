@@ -3,10 +3,13 @@ package org.parking.preparatory.service;
 import org.parking.model.CarData;
 import org.parking.model.RawSqlData;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Mono;
 
 @Log4j2
 @Service
@@ -24,9 +27,7 @@ public class DataRequestServiceImpl implements DataRequestService {
 		log.trace("DataRequestServiceImpl : getDataFromCODP : carData={}", carData);
 		RawSqlData rawSqlData = null;
 		try {
-			client = WebClient.create(url);
-			log.trace("getDataFromCODP : client.toString={}", client.toString());
-			rawSqlData = getData(carData);
+			rawSqlData = getData(carData).block();
 			log.trace("getDataFromCODP : rawSqlData={}", rawSqlData);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -34,10 +35,17 @@ public class DataRequestServiceImpl implements DataRequestService {
 		return rawSqlData;
 	}
 
-	private RawSqlData getData(CarData carData) {
-
-		return client.get().uri(urn).attribute("attributeName", carData).retrieve().bodyToMono(RawSqlData.class)
-				.block();
+	private Mono<RawSqlData> getData(CarData carData) {
+		return client
+				.method(HttpMethod.GET)
+				.uri(urn)
+				.body(Mono.just(carData), CarData.class)
+				.retrieve()
+				.bodyToMono(RawSqlData.class);
 	};
 
+	@PostConstruct
+	void createWebClient() {
+		this.client = WebClient.create(url);
+	}
 }

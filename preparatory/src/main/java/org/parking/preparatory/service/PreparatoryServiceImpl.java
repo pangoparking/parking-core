@@ -27,7 +27,9 @@ public class PreparatoryServiceImpl implements FinePreparatoryService {
 
 	private Fine createFine(RawSqlData rawSqlData) {
 		log.trace("PreparatoryServiceImpl : createFine");
-		long pseudoId = Long.valueOf(String.format("%d%d", Instant.now().getEpochSecond(), rawSqlData.carID)); // crutch
+		var currTime = Instant.now().getEpochSecond();
+		log.trace("createFine : currTime={}, rawSqlData.carID={}", currTime, rawSqlData.carID);
+		long pseudoId = Long.valueOf(String.format("%d%d", currTime, rawSqlData.carID)); // crutch
 		log.trace("createFine : pseudoId={}", pseudoId);
 		Fine fine = new Fine(pseudoId, rawSqlData.ownerID, rawSqlData.ownerName, rawSqlData.ownerEmail,
 				rawSqlData.carID, rawSqlData.parkingPlace, rawSqlData.fineBeenIssuedTime, rawSqlData.fineCost,

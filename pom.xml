@@ -95,5 +95,6 @@
 		<module>notifier</module>
 		<module>reports-back-office</module>
 		<module>preparatory</module>
+		<module>pakah-back-office</module>
 	</modules>
 </project>
